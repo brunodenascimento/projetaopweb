@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>ATIVIDADE PI</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div><canvas id="graficoMulheres"></canvas></div>
+  <div><canvas id="graficoHomens"></canvas></div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    //Função para coletar e filtrar as idades e nomes do arquivo csv
+    //Por essa função usar o FETCH é necessario o uso de promisses (then)
+    function coletarDadosCsv(nome_arquivo) {
+      return fetch(nome_arquivo)
+        .then((data) => data.text())
+        .then((data) => {
+          let idades = []
+          let nomes = []
+          data.split('\n').slice(1,-1).forEach((linha) => {
+            idades.push(parseInt(linha.split(',')[2]))
+            nomes.push(linha.split(',')[3])
+          })
+          return [idades, nomes]
+        })
+    }
+
+    //Função para montar grafico do ChartJS
+    function montarGrafico(idades, nomes, elementId) {
+      const ctx = document.getElementById(elementId);
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: nomes,
+          datasets: [{
+            label: 'Idade',
+            data: idades,
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    };
+    
+    coletarDadosCsv('oscar_age_female.csv')
+      .then((resultado) => {
+        let [idadesFemininas, nomesFemininos] = resultado;
+        montarGrafico(idadesFemininas, nomesFemininos, 'graficoMulheres');
+      });
+
+    coletarDadosCsv('oscar_age_male.csv')
+    .then((resultado) => {
+      let [idadesMasculinas, nomesMasculinos] = resultado;
+      montarGrafico(idadesMasculinas, nomesMasculinos, 'graficoHomens');
+    });
+  </script>
+</body>
+</html>
